@@ -1,0 +1,162 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | Online Agri Shop</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .checkout-box {
+            max-width: 450px;
+            margin: 30px auto;
+            padding: 25px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px #ccc;
+        }
+
+        .checkout-box input,
+        .checkout-box textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px;
+            margin: 8px 0 15px;
+        }
+
+        .checkout-box button,
+        .track-button {
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px;
+            background: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            margin-top: 12px;
+        }
+
+        .success {
+            color: #2e7d32;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+<header>
+    <h1>🌾 Online Agri Shop</h1>
+    <p>Checkout</p>
+</header>
+
+<nav class="navbar">
+    <a href="index.html">Home</a>
+    <a href="products.html">Products</a>
+    <a href="cart.html">Cart</a>
+</nav>
+
+<div class="checkout-box">
+    <h2 id="heading">Delivery Details</h2>
+    <p id="total"></p>
+    <p id="message" role="status"></p>
+
+    <form id="checkoutForm">
+        <label>Full Name</label>
+        <input id="name" type="text" required>
+
+        <label>Mobile Number</label>
+        <input id="phone" type="tel"
+               pattern="[0-9]{10}" maxlength="10"
+               placeholder="10 digit mobile number" required>
+
+        <label>Delivery Address</label>
+        <textarea id="address" required></textarea>
+
+        <button type="submit" id="placeOrder">
+            Place Order
+        </button>
+    </form>
+</div>
+
+<script>
+const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+
+const totalAmount = cart.reduce((sum, item) => {
+    const quantity = Number(item.quantity) || 1;
+    return sum + Number(item.price) * quantity;
+}, 0);
+
+const totalElement = document.getElementById("total");
+const form = document.getElementById("checkoutForm");
+const button = document.getElementById("placeOrder");
+const message = document.getElementById("message");
+
+totalElement.textContent = "Total Amount: ₹" + totalAmount;
+
+form.addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    if (cart.length === 0) {
+        message.textContent = "Your cart is empty. Please add products first.";
+        return;
+    }
+
+    button.disabled = true;
+    message.textContent = "Placing your order...";
+
+    try {
+        const response = await fetch("/api/orders", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                name: document.getElementById("name").value.trim(),
+                phone: document.getElementById("phone").value.trim(),
+                address: document.getElementById("address").value.trim(),
+                items: cart
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || "Order failed.");
+        }
+
+        // Save the actual database order ID
+        localStorage.setItem("lastOrderId", data.orderId);
+        localStorage.removeItem("cart");
+
+        // Show success message and tracking link
+        document.getElementById("heading").textContent = "Order Confirmation";
+        form.remove();
+        totalElement.textContent = "";
+        message.className = "success";
+        message.textContent =
+            "✅ Order Placed Successfully! Your Order ID is " + data.orderId;
+
+        const trackLink = document.createElement("a");
+        trackLink.className = "track-button";
+        trackLink.textContent = "Track My Order";
+        trackLink.href =
+            "order-details.html?id=" + encodeURIComponent(data.orderId);
+
+        document.querySelector(".checkout-box").appendChild(trackLink);
+
+    } catch (error) {
+        message.textContent = error.message +
+            " Please check that your backend is running.";
+    } finally {
+        button.disabled = false;
+    }
+});
+</script>
+</body>
+</html>

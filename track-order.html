@@ -1,0 +1,167 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Order | Online Agri Shop</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .track-container {
+            max-width: 650px;
+            margin: 35px auto;
+            padding: 20px;
+        }
+
+        .track-box, .result-box {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px #ddd;
+            margin-bottom: 20px;
+        }
+
+        .track-box h2 {
+            color: #2e7d32;
+            text-align: center;
+        }
+
+        .track-box input {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 12px;
+            margin: 12px 0;
+        }
+
+        .track-box button {
+            width: 100%;
+            padding: 12px;
+            background: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .track-box button:hover {
+            background: #1b5e20;
+        }
+
+        .result-box h3 {
+            color: #2e7d32;
+        }
+
+        .result-box p {
+            overflow-wrap: anywhere;
+        }
+
+        #message {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>🌾 Online Agri Shop</h1>
+</header>
+
+<nav class="navbar">
+    <a href="index.html">Home</a>
+    <a href="products.html">Products</a>
+    <a href="cart.html">Cart 🛒</a>
+    <a href="login.html">Login</a>
+    <a href="track-order.html">Track Order</a>
+</nav>
+
+<main class="track-container">
+
+    <section class="track-box">
+        <h2>📦 Track Your Order</h2>
+        <p>Enter your Order ID to check your order details.</p>
+
+        <form id="trackForm">
+            <input
+                type="number"
+                id="orderId"
+                min="1"
+                step="1"
+                placeholder="Enter Order ID (e.g. 1)"
+                required
+            >
+            <button type="submit">Track Order</button>
+        </form>
+
+        <p id="message" role="status"></p>
+    </section>
+
+    <section class="result-box" id="result" hidden>
+        <h3>Order Details</h3>
+        <p><strong>Order ID:</strong> <span id="id"></span></p>
+        <p><strong>Customer:</strong> <span id="customer"></span></p>
+        <p><strong>Products:</strong> <span id="products"></span></p>
+        <p><strong>Total Bill:</strong> ₹<span id="total"></span></p>
+        <p><strong>Order Status:</strong> <span id="status"></span></p>
+        <p><strong>Order Date:</strong> <span id="date"></span></p>
+    </section>
+
+</main>
+
+<footer>
+    <p style="text-align:center;">
+        © 2026 Online Agri Shop | College Project
+    </p>
+</footer>
+
+<script>
+document.getElementById("trackForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const orderId = document.getElementById("orderId").value.trim();
+    const message = document.getElementById("message");
+    const result = document.getElementById("result");
+
+    result.hidden = true;
+    message.style.color = "#b71c1c";
+    message.textContent = "Searching for your order...";
+
+    try {
+        const response = await fetch(
+            "/api/orders/" + encodeURIComponent(orderId)
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            message.textContent = data.message || "Order not found.";
+            return;
+        }
+
+        document.getElementById("id").textContent = data.orderId;
+        document.getElementById("customer").textContent = data.name;
+
+        document.getElementById("products").textContent =
+            data.items.map(item =>
+                item.name + " × " + item.quantity
+            ).join(", ");
+
+        document.getElementById("total").textContent = data.total;
+        document.getElementById("status").textContent = data.status;
+
+        document.getElementById("date").textContent =
+            new Date(data.date).toLocaleString();
+
+        result.hidden = false;
+        message.textContent = "";
+
+    } catch (error) {
+        message.textContent =
+            "Could not connect to server. Please check your backend.";
+    }
+});
+</script>
+
+</body>
+</html>

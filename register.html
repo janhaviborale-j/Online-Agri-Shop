@@ -1,0 +1,198 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register | Online Agri Shop</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .register-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 85vh;
+        }
+
+        .register-box {
+            background: white;
+            padding: 30px;
+            width: 350px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+            text-align: center;
+        }
+
+        .register-box img {
+            width: 80px;
+            margin-bottom: 10px;
+        }
+
+        .register-box h2 {
+            margin-bottom: 20px;
+            color: #2e7d32;
+        }
+
+        .register-box input,
+        .register-box select {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            box-sizing: border-box;
+        }
+
+        .register-box button {
+            background: #2e7d32;
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            margin-top: 10px;
+        }
+
+        .register-box button:hover {
+            background: #1b5e20;
+        }
+
+        .register-box p {
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .register-box a {
+            color: #2e7d32;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        #message {
+            overflow-wrap: anywhere;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>🌾 Online Agri Shop</h1>
+</header>
+
+<nav class="navbar">
+    <a href="index.html">Home</a>
+    <a href="products.html">Products</a>
+    <a href="login.html">Login</a>
+    <a href="register.html">Register</a>
+    <a href="contact.html">Contact</a>
+</nav>
+
+<div class="register-container">
+    <div class="register-box">
+
+        <img
+            src="https://cdn-icons-png.flaticon.com/512/2922/2922510.png"
+            alt="User">
+
+        <h2>Create Account</h2>
+
+        <form id="registerForm">
+
+            <input
+                type="text"
+                id="name"
+                placeholder="Enter Full Name"
+                required>
+
+            <input
+                type="email"
+                id="email"
+                placeholder="Enter Email"
+                required>
+
+            <input
+                type="password"
+                id="password"
+                placeholder="Create Password"
+                minlength="8"
+                required>
+
+            <select id="userType" required>
+                <option value="">Select User Type</option>
+                <option value="Farmer">Farmer</option>
+                <option value="Customer">Customer</option>
+            </select>
+
+            <button type="submit" id="registerBtn">
+                Register
+            </button>
+
+        </form>
+
+        <p id="message" role="status"></p>
+
+        <p>
+            Already have an account?
+            <a href="login.html">Login</a>
+        </p>
+
+    </div>
+</div>
+
+<footer>
+    <p>© 2026 Online Agri Shop | College Project</p>
+</footer>
+
+<script>
+document.getElementById("registerForm")
+.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    const button = document.getElementById("registerBtn");
+    const message = document.getElementById("message");
+
+    const userData = {
+        name: document.getElementById("name").value.trim(),
+        email: document.getElementById("email").value.trim(),
+        password: document.getElementById("password").value,
+        userType: document.getElementById("userType").value
+    };
+
+    button.disabled = true;
+    message.textContent = "Registering...";
+
+    try {
+        const response = await fetch("/api/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(userData)
+        });
+
+        const result = await response.json();
+
+        message.textContent = result.message ||
+            (response.ok ? "Registration successful!" :
+            "Registration failed.");
+
+        if (response.ok) {
+            document.getElementById("registerForm").reset();
+
+            setTimeout(function() {
+                window.location.href = "login.html";
+            }, 1200);
+        }
+
+    } catch (error) {
+        message.textContent =
+            "Server connection failed. Check whether backend is running.";
+    } finally {
+        button.disabled = false;
+    }
+});
+</script>
+
+</body>
+</html>

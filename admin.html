@@ -1,0 +1,361 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Online Agri Shop</title>
+    <link rel="stylesheet" href="style.css">
+        #message {
+            font-weight: bold;
+        }
+    <style>
+        .admin-box {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 25px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px #ccc;
+        }
+
+        .admin-box input,
+        .admin-box textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px;
+            margin: 8px 0 15px;
+        }
+
+        .admin-box button {
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            background: #2e7d32;
+        }
+
+        .admin-box .delete-btn {
+            background: #c62828;
+        }
+
+        .product-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        #message {
+            font-weight: bold;
+        }
+        
+        /* Admin Dashboard Cards */
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .dashboard-card {
+            background: #e8f5e9;
+            border: 1px solid #c8e6c9;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .dashboard-card h3 {
+            color: #1b5e20;
+        }
+
+        .dashboard-card p {
+            font-size: 26px;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        #dashboard {
+            scroll-margin-top: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .dashboard-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+<header>
+    <h1>🌾 Online Agri Shop</h1>
+    <p>Admin Dashboard — Manage Products</p>
+</header>
+
+<nav class="navbar">
+    <a href="index.html">Home</a>
+    <a href="products.html">Products</a>
+    <a href="#dashboard">Admin</a>
+</nav>
+
+<section id="dashboard" class="admin-box">
+    <h2>Admin Dashboard</h2>
+
+    <div class="dashboard-cards">
+        <div class="dashboard-card">
+            <h3>Total Products</h3>
+            <p id="totalProducts">Loading...</p>
+        </div>
+
+        <div class="dashboard-card">
+            <h3>Total Orders</h3>
+            <p id="totalOrders">Loading...</p>
+        </div>
+
+        <div class="dashboard-card">
+            <h3>Registered Users</h3>
+            <p id="totalUsers">Loading...</p>
+        </div>
+
+        <div class="dashboard-card">
+            <h3>Total Sales</h3>
+            <p id="totalSales">Loading...</p>
+        </div>
+    </div>
+
+    <h2>Recent Orders</h2>
+    <div id="adminOrders">Loading orders...</div>
+</section>
+
+<div class="admin-box">
+    <h2 id="formTitle">Add New Product</h2>
+
+    <p id="message" role="status"></p>
+
+    <form id="productForm">
+        <label>Product Name</label>
+        <input id="name" type="text" placeholder="e.g. Tomato" required>
+
+        <label>Price (₹)</label>
+        <input id="price" type="number" min="0.01" step="0.01"
+               placeholder="e.g. 30" required>
+
+        <label>Unit</label>
+        <input id="unit" type="text" placeholder="e.g. kg or bunch" required>
+
+        <label>Description</label>
+        <textarea id="description" placeholder="Product description"></textarea>
+
+        <button type="submit" id="saveBtn">Add Product</button>
+        <button type="button" id="cancelBtn" hidden>Cancel Edit</button>
+    </form>
+
+    <hr>
+
+    <h2>All Products</h2>
+    <div id="productList">Loading products...</div>
+</div>
+
+<footer>
+    <p>© 2026 Online Agri Shop | College Project</p>
+</footer>
+
+<script>
+const form = document.getElementById("productForm");
+const message = document.getElementById("message");
+const productList = document.getElementById("productList");
+const saveBtn = document.getElementById("saveBtn");
+const cancelBtn = document.getElementById("cancelBtn");
+
+let editingId = null;
+
+async function requestAPI(url, options = {}) {
+    const response = await fetch(url, {
+        ...options,
+        headers: {
+            "Content-Type": "application/json",
+            ...(options.headers || {})
+        }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.message || "Request failed.");
+    }
+
+    return data;
+}
+
+async function loadProducts() {
+    productList.textContent = "Loading products...";
+
+    try {
+        const products = await requestAPI("/api/products");
+
+        productList.innerHTML = "";
+
+        if (products.length === 0) {
+            productList.textContent = "No products added yet.";
+            return;
+        }
+
+        products.forEach(product => {
+            const card = document.createElement("div");
+            card.className = "product-card";
+
+            const title = document.createElement("h3");
+            title.textContent = product.name;
+
+            const price = document.createElement("p");
+            price.textContent =
+                "Price: ₹" + product.price + " / " + product.unit;
+
+            const description = document.createElement("p");
+            description.textContent = product.description || "No description";
+
+            const editBtn = document.createElement("button");
+            editBtn.textContent = "Edit";
+            editBtn.addEventListener("click", () => editProduct(product));
+
+            const deleteBtn = document.createElement("button");
+            deleteBtn.textContent = "Delete";
+            deleteBtn.className = "delete-btn";
+            deleteBtn.addEventListener("click", () => deleteProduct(product.id));
+
+            card.append(title, price, description, editBtn, deleteBtn);
+            productList.appendChild(card);
+        });
+    } catch (error) {
+        productList.textContent = error.message;
+    }
+}
+
+function editProduct(product) {
+    editingId = product.id;
+
+    document.getElementById("name").value = product.name;
+    document.getElementById("price").value = product.price;
+    document.getElementById("unit").value = product.unit;
+    document.getElementById("description").value =
+        product.description || "";
+
+    document.getElementById("formTitle").textContent = "Edit Product";
+    saveBtn.textContent = "Update Product";
+    cancelBtn.hidden = false;
+
+    message.textContent = "Edit the details and click Update Product.";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function resetForm() {
+    editingId = null;
+    form.reset();
+
+    document.getElementById("formTitle").textContent = "Add New Product";
+    saveBtn.textContent = "Add Product";
+    cancelBtn.hidden = true;
+}
+
+cancelBtn.addEventListener("click", () => {
+    resetForm();
+    message.textContent = "";
+});
+
+form.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const product = {
+        name: document.getElementById("name").value.trim(),
+        price: Number(document.getElementById("price").value),
+        unit: document.getElementById("unit").value.trim(),
+        description: document.getElementById("description").value.trim()
+    };
+
+    saveBtn.disabled = true;
+    message.textContent = "Saving product...";
+
+    try {
+        if (editingId !== null) {
+            await requestAPI("/api/products/" + editingId, {
+                method: "PUT",
+                body: JSON.stringify(product)
+            });
+
+            message.textContent = "Product updated successfully! ✅";
+        } else {
+            await requestAPI("/api/products", {
+                method: "POST",
+                body: JSON.stringify(product)
+            });
+
+            message.textContent = "Product added successfully! ✅";
+        }
+
+        resetForm();
+        await loadProducts();
+    } catch (error) {
+        message.textContent = error.message;
+    } finally {
+        saveBtn.disabled = false;
+    }
+});
+
+async function deleteProduct(id) {
+    if (!confirm("Are you sure you want to delete this product?")) {
+        return;
+    }
+
+    try {
+        const result = await requestAPI("/api/products/" + id, {
+            method: "DELETE"
+        });
+
+        message.textContent = result.message + " ✅";
+        await loadProducts();
+    } catch (error) {
+        message.textContent = error.message;
+    }
+}
+
+async function loadDashboard() {
+    try {
+        const response = await fetch("/api/admin/summary");
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || "Dashboard data failed");
+        }
+
+        document.getElementById("totalProducts").textContent =
+            data.totalProducts;
+
+        document.getElementById("totalOrders").textContent =
+            data.totalOrders;
+
+        document.getElementById("totalUsers").textContent =
+            data.totalUsers;
+
+        document.getElementById("totalSales").textContent =
+            "₹" + data.totalSales;
+
+    } catch (error) {
+        console.error("Dashboard error:", error);
+
+        document.getElementById("totalProducts").textContent = "Error";
+        document.getElementById("totalOrders").textContent = "Error";
+        document.getElementById("totalUsers").textContent = "Error";
+        document.getElementById("totalSales").textContent = "Error";
+    }
+}
+
+loadDashboard();
+loadProducts();
+</script>
+</body>
+</html>

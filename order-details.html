@@ -1,0 +1,180 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details | Online Agri Shop</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .order-box {
+            max-width: 550px;
+            margin: 30px auto;
+            padding: 25px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px #ccc;
+        }
+
+        .order-box h2 {
+            color: #2e7d32;
+            text-align: center;
+        }
+
+        .success {
+            text-align: center;
+            color: green;
+            font-weight: bold;
+        }
+
+        .order-box li {
+            margin: 10px 0;
+        }
+
+        .order-box button {
+            background: #2e7d32;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .order-box a {
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>🌾 Online Agri Shop</h1>
+    <p>Order Details</p>
+</header>
+
+<nav class="navbar">
+    <a href="index.html">Home</a>
+    <a href="products.html">Products</a>
+    <a href="cart.html">Cart</a>
+</nav>
+
+<div class="order-box" id="orderBox">
+    <h2>Order Details</h2>
+    <p>Loading order...</p>
+</div>
+
+
+<script>
+async function loadOrder() {
+    const box = document.getElementById("orderBox");
+
+    box.innerHTML = "<h2>Order Details</h2><p>Loading order...</p>";
+
+    const params = new URLSearchParams(window.location.search);
+
+    const orderId =
+        params.get("id") ||
+        localStorage.getItem("lastOrderId");
+
+    if (!orderId) {
+        box.innerHTML = `
+            <h2>No Order Found</h2>
+            <p>Please place an order first.</p>
+            <button onclick="location.href='products.html'">
+                Shop Now
+            </button>
+        `;
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            "/api/orders/" + encodeURIComponent(orderId)
+        );
+
+        const order = await response.json();
+
+        if (!response.ok) {
+            throw new Error(order.message || "Order not found.");
+        }
+
+        box.innerHTML = "";
+
+        const success = document.createElement("h2");
+        success.textContent = "✅ Order Tracking";
+        box.appendChild(success);
+
+        const details = [
+            ["Order ID", order.orderId],
+            ["Customer Name", order.name],
+            ["Mobile", order.phone],
+            ["Address", order.address],
+            ["Order Date", order.date],
+            ["Order Status", order.status]
+        ];
+
+        details.forEach(([label, value]) => {
+            const p = document.createElement("p");
+            p.textContent = label + ": " + (value ?? "");
+            box.appendChild(p);
+        });
+
+        const title = document.createElement("h3");
+        title.textContent = "Products Ordered";
+        box.appendChild(title);
+
+        const list = document.createElement("ul");
+        let total = 0;
+
+        order.items.forEach(item => {
+            const quantity = Number(item.quantity) || 1;
+            const price = Number(item.price) || 0;
+
+            total += price * quantity;
+
+            const li = document.createElement("li");
+            li.textContent =
+                item.name + " - ₹" + price + " × " + quantity;
+
+            list.appendChild(li);
+        });
+
+        box.appendChild(list);
+
+        const bill = document.createElement("h3");
+        bill.textContent =
+            "Total Bill: ₹" + (Number(order.total) || total);
+
+        box.appendChild(bill);
+
+        const button = document.createElement("button");
+        button.textContent = "Continue Shopping";
+        button.onclick = () => {
+            window.location.href = "products.html";
+        };
+
+        box.appendChild(button);
+
+    } catch (error) {
+        console.error("Order error:", error);
+
+        box.innerHTML = `
+            <h2>Unable to Load Order</h2>
+            <p>${error.message}</p>
+            <p>Please check your Order ID and try again.</p>
+        `;
+    }
+}
+
+loadOrder();
+</script>
+
+<footer>
+    <p>© 2026 Online Agri Shop | College Project</p>
+</footer>
+
+</body>
+</html>

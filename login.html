@@ -1,0 +1,170 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login | Online Agri Shop</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+        }
+
+        .login-box {
+            background: white;
+            padding: 30px;
+            width: 320px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+            text-align: center;
+        }
+
+        .login-box img {
+            width: 80px;
+            margin-bottom: 10px;
+        }
+
+        .login-box h2 {
+            margin-bottom: 20px;
+            color: #2e7d32;
+        }
+
+        .login-box input {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        .login-box button {
+            background: #2e7d32;
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .login-box button:hover {
+            background: #1b5e20;
+        }
+
+        .login-box p {
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .login-box a {
+            color: #2e7d32;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        #message {
+            overflow-wrap: anywhere;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>🌾 Online Agri Shop</h1>
+</header>
+
+<nav class="navbar">
+    <a href="index.html">Home</a>
+    <a href="products.html">Products</a>
+    <a href="login.html">Login</a>
+    <a href="register.html">Register</a>
+    <a href="contact.html">Contact</a>
+</nav>
+
+<div class="login-container">
+    <div class="login-box">
+
+        <img
+            src="https://cdn-icons-png.flaticon.com/512/5087/5087579.png"
+            alt="User icon"
+        >
+
+        <h2>User Login</h2>
+
+        <form id="loginForm">
+            <input
+                type="email"
+                id="email"
+                placeholder="Enter Email"
+                required
+            >
+
+            <input
+                type="password"
+                id="password"
+                placeholder="Enter Password"
+                required
+            >
+
+            <button type="submit">Login</button>
+        </form>
+
+        <p id="message" role="status"></p>
+
+        <p>
+            Don't have an account?
+            <a href="register.html">Register</a>
+        </p>
+    </div>
+</div>
+
+<footer>
+    <p>© 2026 Online Agri Shop | College Project</p>
+</footer>
+
+<script>
+document.getElementById("loginForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const message = document.getElementById("message");
+
+    message.textContent = "Please wait...";
+
+    try {
+        const response = await fetch("/api/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            message.style.color = "red";
+            message.textContent = data.message || "Login failed.";
+            return;
+        }
+
+        message.style.color = "green";
+        message.textContent = "Welcome " + data.name + "! Login successful!";
+
+        sessionStorage.setItem("loggedInUser", JSON.stringify(data));
+
+    } catch (error) {
+        message.style.color = "red";
+        message.textContent =
+            "Server connection failed. Open this page using localhost:3000.";
+    }
+});
+</script>
+
+</body>
+</html>

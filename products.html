@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Products | Online Agri Shop</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+    <h1>🌾 Online Agri Shop</h1>
+</header>
+
+<nav class="navbar">
+    <a href="index.html">Home</a>
+    <a href="products.html">Products</a>
+    <a href="cart.html">Cart 🛒</a>
+    <a href="login.html">Login</a>
+</nav>
+
+<h2 style="text-align:center;">Fresh Vegetables</h2>
+
+<div class="products">
+
+    <!-- PRODUCT CARD -->
+    <div class="card">
+        <img src="https://tse3.mm.bing.net/th/id/OIP.JMRIOYp2jmlICSlEma_3gQHaE7?rs=1&pid=ImgDetMain&o=7&rm=3">
+        <h3>Tomato</h3>
+        <p>₹30 / kg</p>
+        <button onclick="addToCart('Tomato', 30)">Add to Cart</button>
+    </div>
+
+    <div class="card">
+        <img src="https://healthwire.pk/wp-content/uploads/2022/03/lady-finger-benefits.jpg">
+        <h3>Lady Finger</h3>
+        <p>₹40 / kg</p>
+        <button onclick="addToCart('Lady Finger', 40)">Add to Cart</button>
+    </div>
+
+    <div class="card">
+        <img src="https://www.orgonatural.com/img/productimg/wal_papdi_250_gm-164.webp">
+        <h3>Papdi Val</h3>
+        <p>₹60 / kg</p>
+        <button onclick="addToCart('Papdi Val', 60)">Add to Cart</button>
+    </div>
+
+    <div class="card">
+        <img src="https://tse1.mm.bing.net/th/id/OIP.KcndTkG8jJJedUxjYKe3fAHaEo?rs=1&pid=ImgDetMain&o=7&rm=3">
+        <h3>Lemon</h3>
+        <p>₹80 / kg</p>
+        <button onclick="addToCart('Lemon', 80)">Add to Cart</button>
+    </div>
+
+    <div class="card">
+        <img src="https://tse2.mm.bing.net/th/id/OIP.r_83DvRZPpTwQ_kDnWc1XgHaE9?rs=1&pid=ImgDetMain&o=7&rm=3">
+        <h3>Spinach</h3>
+        <p>₹25 / bunch</p>
+        <button onclick="addToCart('Spinach', 25)">Add to Cart</button>
+    </div>
+
+    <div class="card">
+        <img src="https://www.gardeningknowhow.com/wp-content/uploads/2021/03/fresh-cauliflower-1536x1152.jpg">
+        <h3>Cauliflower</h3>
+        <p>₹50 / kg</p>
+        <button onclick="addToCart('Cauliflower', 50)">Add to Cart</button>
+    </div>
+
+    <div class="card">
+        <img src="https://tse1.mm.bing.net/th/id/OIP.OtHDtVRi6fOGUacPDV_YBAHaHa?rs=1&pid=ImgDetMain&o=7&rm=3">
+        <h3>Coriander</h3>
+        <p>₹20 / bunch</p>
+        <button onclick="addToCart('Coriander', 20)">Add to Cart</button>
+    </div>
+
+    <div class="card">
+        <img src="https://cdn.pixabay.com/photo/2017/09/03/13/18/capsicum-2710262_1280.jpg">
+        <h3>Capsicum</h3>
+        <p>₹70 / kg</p>
+        <button onclick="addToCart('Capsicum', 70)">Add to Cart</button>
+    </div>
+
+    <div class="card">
+        <img src="https://static.vecteezy.com/system/resources/previews/030/663/871/large_2x/carrots-with-transparent-background-high-quality-ultra-hd-free-photo.jpg">
+        <h3>Carrot</h3>
+        <p>₹45 / kg</p>
+        <button onclick="addToCart('Carrot', 45)">Add to Cart</button>
+    </div>
+
+    <div class="card">
+        <img src="https://media.istockphoto.com/id/155431404/photo/green-pea.jpg?b=1&s=170667a&w=0&k=20&c=j5RxJVmuGbIY4i2fwi8audM4dVJOjhgTXWLuczTQpBU=">
+        <h3>Green Peas</h3>
+        <p>₹90 / kg</p>
+        <button onclick="addToCart('Green Peas', 90)">Add to Cart</button>
+    </div>
+
+</div>
+
+<script>
+function addToCart(name, price) {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    cart.push({ name, price });
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+
+    alert(name + " added to cart 🛒");
+}
+</script>
+
+</body>
+</html>
